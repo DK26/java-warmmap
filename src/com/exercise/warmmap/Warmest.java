@@ -1,12 +1,12 @@
 package com.exercise.warmmap;
 
+import java.util.EmptyStackException;
 import java.util.Stack;
 
 public class Warmest<K, V> {
 
     // TODO: `warmest` is some kind of stack (hidden exercise)
     private final Stack<Entry<K, V>> warmest_stack;
-    private Entry<K, V> dummy_value;
 
     public Warmest() {
         this.warmest_stack = new Stack<>();
@@ -18,7 +18,6 @@ public class Warmest<K, V> {
 
         this.warmest_stack.push(entry);
 
-        this.dummy_value = entry;
         // TODO: Assign value to data structure
 
         return this;
@@ -26,26 +25,40 @@ public class Warmest<K, V> {
 
     public V get(K key) {
 
-        // TODO: Replace `result` with actual map algorithm
-        Entry<K, V> result = null;
+        Entry<K, V> found_entry = null; // TODO: Replace `null` with `get_entry()` implementation
 
-        if (result != null) {
-            this.warmest_stack.push(result);
+        V result = null;
+
+        if (found_entry != null) {
+            result = found_entry.value();
+            this.warmest_stack.push(found_entry);
         }
 
         // TODO: Returns either a value or null
-        return result.value();
+        return result;
     }
 
     public V remove(K key) {
-        // TODO: Update Warmest with second warmest
+        Entry<K, V> found_entry = null; // TODO: Replace `null` with `get_entry()` implementation
 
-        // TODO: Return value or null
-        return null;
+        if (found_entry == null) {
+            return null;
+        }
+
+        // Remove any trace of the object from the stack
+        while(this.warmest_stack.remove(found_entry));
+
+        // TODO: Remove key from map
+
+        return found_entry.value();
     }
 
     public V getWarmest() {
         // Peak in a stack is considered an O(1) operation.
-        return this.warmest_stack.peek().value();
+        try {
+            return this.warmest_stack.peek().value();
+        }catch (EmptyStackException e) {
+            return null;
+        }
     }
 }
