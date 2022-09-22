@@ -11,11 +11,7 @@ import java.util.Stack;
 
 public class Warmest<K, V> {
 
-    private final Stack<Entry<K, V>> warmest_stack;
-
-    public Warmest() {
-        this.warmest_stack = new Stack<>();
-    }
+    private final Stack<Entry<K, V>> warmest_stack = new Stack<>();
 
     public Warmest put(K key, V value) {
 
@@ -68,7 +64,7 @@ public class Warmest<K, V> {
         // `peek()` for a stack is considered an O(1) operation.
         try {
             return this.warmest_stack.peek().value();
-        }catch (EmptyStackException e) {
+        } catch (EmptyStackException e) {
             return null;
         }
     }

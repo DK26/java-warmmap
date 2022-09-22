@@ -5,9 +5,9 @@
 package com.exercise.warmmap;
 
 public class LazyTest {
-    public static void assert_eq(Object left, Object right, String exceptionMsg) throws Exception {
+    public static void assert_eq(Object left, Object right) throws Exception {
         if (left != right) {
-            throw new Exception(String.format("%s: %s (left) != %s (right)%n", exceptionMsg, left.toString(), right.toString()));
+            throw new Exception(String.format("%s (left) != %s (right)%n", left.toString(), right.toString()));
         }
     }
 
