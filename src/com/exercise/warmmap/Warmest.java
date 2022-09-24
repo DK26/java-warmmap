@@ -44,7 +44,7 @@ public class Warmest<K, V> {
 
         if (found_entry != null) {
             result = found_entry.value();
-            this.warmest_deque.push(found_entry);
+            this.warmest_deque.push(found_entry);  // O(1)
         }
 
         return result;
@@ -67,8 +67,8 @@ public class Warmest<K, V> {
     }
 
     public V getWarmest() {
-        // `peek()` for a stack is considered an O(1) operation.
-        Entry<K, V> result = this.warmest_deque.peek();
+        // `peek()` for a deque is considered an O(1) operation.
+        Entry<K, V> result = this.warmest_deque.peek();  // O(1)
 
         if (result != null) {
             return result.value();
