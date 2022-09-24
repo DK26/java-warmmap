@@ -1,7 +1,7 @@
 package com.exercise.warmmap;
 
-import java.util.EmptyStackException;
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 // Ideally, I would like to implement either a Swiss hash table map or a B-Tree map,
 // but since it turned to be complicated to learn and to implement in a very limited time frame,
@@ -11,13 +11,15 @@ import java.util.Stack;
 
 public class Warmest<K, V> {
 
-    private final Stack<Entry<K, V>> warmest_stack = new Stack<>();
+    // Serves both for storing the data and recording history.
+    // Contains references for Entry objects.
+    private final Deque<Entry<K, V>> warmest_deque = new ArrayDeque<>();
 
     public Warmest put(K key, V value) {
 
         Entry<K, V> entry = new Entry<>(key, value);
 
-        this.warmest_stack.push(entry);
+        this.warmest_deque.push(entry);
 
         return this;
     }
@@ -25,14 +27,15 @@ public class Warmest<K, V> {
     private Entry<K, V> search_entry(K key) {
 
         // Inefficient O(n), but working
-        for (Entry<K, V> c : this.warmest_stack) {
-            if (c.key() == key) {
-                return c;
+        for (Entry<K, V> e : this.warmest_deque) {
+            if (e.key() == key) {
+                return e;
             }
         }
         return null;
     }
 
+    // O(n)
     public V get(K key) {
 
         Entry<K, V> found_entry = search_entry(key);
@@ -41,31 +44,36 @@ public class Warmest<K, V> {
 
         if (found_entry != null) {
             result = found_entry.value();
-            this.warmest_stack.push(found_entry);
+            this.warmest_deque.push(found_entry);
         }
 
         return result;
     }
 
+    // Guessing O(n^2)
     public V remove(K key) {
-        Entry<K, V> found_entry = search_entry(key);
+
+        Entry<K, V> found_entry = search_entry(key);  // O(n)
 
         if (found_entry == null) {
             return null;
         }
-
-        // Remove any trace of the object from the stack
-        while(this.warmest_stack.remove(found_entry));
+        // Keep removing any trace of the key from the deque
+        // (Not sure if this is idiomatic Java)
+        // O(n) for each iteration but for a reduced size
+        while(this.warmest_deque.remove(found_entry));
 
         return found_entry.value();
     }
 
     public V getWarmest() {
         // `peek()` for a stack is considered an O(1) operation.
-        try {
-            return this.warmest_stack.peek().value();
-        } catch (EmptyStackException e) {
-            return null;
+        Entry<K, V> result = this.warmest_deque.peek();
+
+        if (result != null) {
+            return result.value();
         }
+        else return null;
+
     }
 }
