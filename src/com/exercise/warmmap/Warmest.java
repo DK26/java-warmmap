@@ -1,79 +1,87 @@
 package com.exercise.warmmap;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-
-// Ideally, I would like to implement either a Swiss hash table map or a B-Tree map,
-// but since it turned to be complicated to learn and to implement in a very limited time frame,
-// I decided to have something working using the same Stack I used to implement the warmest logical flow.
-// Looking back, maybe I should have tried to implement this with my own stack, but I was under the assumption
-// that a B-Tree is required and that it could be the most efficient algorithm I hoped I could easily implement.
+import java.util.HashMap;
 
 public class Warmest<K, V> {
 
     // Serves both for storing the data and recording history.
     // Contains references for Entry objects.
-    private final Deque<Entry<K, V>> warmest_deque = new ArrayDeque<>();
+    private final HashMap<K, Entry<V>> warmest_map = new HashMap<>();
+
+    private Entry<V> first = null;
+    private Entry<V> last = null;
+    private V warmest = null;
+
 
     public Warmest put(K key, V value) {
 
-        Entry<K, V> entry = new Entry<>(key, value);
+        Entry<V> entry = this.warmest_map.get(key);
 
-        this.warmest_deque.push(entry);
+        if (entry == null) {
+
+            entry = new Entry<>(value);
+
+            if (this.first == null) {
+                this.first = entry;
+            } else {
+
+                // `this.last` cannot be null if `this.first` is not null
+
+                this.first.setPrev(entry);
+                entry.setNext(this.first);
+
+                this.last.setNext(entry);
+                entry.setPrev(this.last);
+
+            }
+
+            this.last = entry;
+            this.warmest_map.put(key, entry);
+        }
+
+        entry.value = value;
+        this.warmest = value;
 
         return this;
     }
 
-    private Entry<K, V> search_entry(K key) {
 
-        // Inefficient O(n), but working
-        for (Entry<K, V> e : this.warmest_deque) {
-            if (e.key() == key) {
-                return e;
-            }
-        }
-        return null;
-    }
-
-    // O(n)
     public V get(K key) {
+        Entry<V> entry = this.warmest_map.get(key);
 
-        Entry<K, V> found_entry = search_entry(key);
-
-        V result = null;
-
-        if (found_entry != null) {
-            result = found_entry.value();
-            this.warmest_deque.push(found_entry);  // O(1)
-        }
-
-        return result;
-    }
-
-    // Guessing O(n^2)
-    public V remove(K key) {
-
-        Entry<K, V> found_entry = search_entry(key);  // O(n)
-
-        if (found_entry == null) {
+        if (entry == null) {
             return null;
         }
-        // Keep removing any trace of the key from the deque
-        // (Not sure if this is idiomatic Java)
-        // O(n) for each iteration but for a reduced size
-        while(this.warmest_deque.remove(found_entry));
 
-        return found_entry.value();
+        this.warmest = entry.value;
+        return entry.value;
+    }
+
+    public V remove(K key) {
+
+        Entry<V> entry = this.warmest_map.remove(key);
+
+        if (entry == null) {
+            return null;
+        }
+
+        if (this.last == entry) {
+            this.last = last.getPrev();
+        }
+
+        if (this.first == entry) {
+            this.first = first.getNext();
+        }
+
+        // Remove from the Linked-List & connect prev and next to each other
+        entry.remove();
+
+        this.warmest = this.last.value;
+
+        return entry.value;
     }
 
     public V getWarmest() {
-        // `peek()` for a deque is considered an O(1) operation.
-        Entry<K, V> result = this.warmest_deque.peek();  // O(1)
-
-        if (result != null) {
-            return result.value();
-        }
-        else return null;
-
+        return this.warmest;
     }
 }
